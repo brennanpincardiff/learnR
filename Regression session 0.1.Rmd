@@ -64,6 +64,7 @@ We will use the mtcars dataset
 ```{r eval=F}
 mtcar
 ```
+
 Let's explore whether a cars weight (mtcars$wt) is associated with it's miles per gallon (mtcars$mpg)
 ```{r eval=T}
 model1 <- lm(mpg~wt,data=mtcars)
@@ -74,27 +75,32 @@ Let's explore the model fit
 plot(fitted(model1),resid(model1))
 abline(h=0)
 ```
+
 The last two commands above will return a plot of the residual values vs. the fitted values for the model, with a horizontal line through y=0.
 We can also plot the absolute value of the residuals vs. the fitted values in order to increase the resolution of one's ability to detect whether there's a trend that would suggest non-constant variance. This is done with the following commands
 ```{r eval=T}
 plot(fitted(model1),abs(resid(model1)))
 ```
+
 A quick way to check non-constant variance quantitatively is this simple regression
 ```{r eval =T}
 summary(lm(abs(resid(model1))~ fitted(model1)))
 ```
+
 For a categorical variable, like mtcars$am (automatic or manual), we can graphically check how the levels are behaving (i.e. – is there any difference among the levels in terms of variance) like this:
 ```{r eval=T}
 plot(resid(model1)~fitted(model1),pch=unclass(mtcars$am))
 ```
+
 The argument “pch” specifies how the “plot characters” should be drawn. 
 Need to look for non-constant variance across all groups, and whether there's any ordering among groups.
 
 It is also possible to use Levene's test to assess the homogeneity of variance assumption. Levene's test is quite insensitive to non-normality. Also, because most parametric statistical tests are relatively insensitive to non-constant variance, there is no need to take action unless Levene’s Test is significant at the 1% level (Faraway 2004).
 ```{r eval =T}
 library(car)
-levene.test(mtcars$mpg,mtcars$am)
+levenetest(mtcars$mpg,mtcars$am)
 ```
+
 Checking the Normality assumption (residuals should be normally distributed for linear models). Note: Only long-tailed distributions cause large inaccuracies for linear models. It is possible to transform log-normal distributions, but mild non-normality can be safely ignored. 
 Make a quantile-quantile (Q-Q) plot that compares the model’s residuals to “ideal” normal observations:
 ```{r eval=T}
