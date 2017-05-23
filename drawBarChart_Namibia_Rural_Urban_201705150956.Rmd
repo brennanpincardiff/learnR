@@ -8,6 +8,9 @@ output:
   word_document: default
 ---
 
+![](https://raw.githubusercontent.com/MarkKelson/learnR/master/learnR.png)
+
+
 ## Plotting your data 
 Plotting is a key aspect of data analysis. It is valuable during two distinct phases: data exploration (at the beginning of the analysis cycle); and data presentation (often at the end of the analysis cycle). 
 
