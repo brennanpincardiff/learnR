@@ -16,6 +16,7 @@
 <h2>Day 3</h2>
 <li>Session 1: Generalised Linear Models | ?
 <li>Session 2: Reporting, scientific writing, interpretation (inc guidance) | Lead: DG
+<li>Session 2a: Markdown, trouble shooting, reusable workflows | Lead: All
 </li>
 
 
