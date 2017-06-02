@@ -3,7 +3,7 @@
 <h2>Day 1</h2>
 <li> Icebreaker | Lead: MK
 <li>Session 1: Introduction to R (why is it useful) | Lead: MK
-<li>Session 2: Getting data into R and simple manipulations - inc data.frame, aggregation, manipulating | Lead: MK
+<li>Session 2: Getting data into R & simple manipulations - inc data.frame, aggregation, manipulating | Lead: DG & MK
 </li>
 
 
