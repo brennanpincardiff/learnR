@@ -22,11 +22,6 @@ Reporting your analyses
 
 Throughout this course we will take a dataset as our fundamental object from which all of our examples will start. This hopefully mirrors the real-life situation that you find yourself in: having a dataset and needing to analyse it. 
 
-We begin with some motivating examples to show you what R can do, and what you will be able to do by the end of the course.
-
-## Motivating examples
-Insert lots of pretty plots here
-
 ## Importing data
 Data can be imported in R in a variety of ways. Type 
 
