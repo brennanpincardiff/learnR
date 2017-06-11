@@ -1,4 +1,7 @@
 ---
+title: "Project Phoenix learnR Session 1 UNAM"
+author: "Dr Mark Kelson - University of Exeter"
+date: "12 June 2017"
 output: pdf_document
 ---
 
@@ -25,15 +28,13 @@ Throughout this course we will take a dataset as our fundamental object from whi
 ## Importing data
 Data can be imported in R in a variety of ways. Type 
 
-
 ```{r eval=F}
 ?read.table
 ```
 
-
-into the console window. A help file will open describing the read.table function. We will now use the read.csv function to import a csv file. Locate the XXXXX file on your USB stick and note it's location. Then type the following
+into the console window. A help file will open describing the read.table function. We will now use the read.csv function to import a csv file. Locate the Delegates.csv file on your USB stick and note it's location. Then type the following
 ```{r eval=F}
-my.data <- read.csv(file="XXXXX")
+my.data <- read.csv(file="***INSERT THE REST OF THE FILE LOCATION HERE***//Delegates.csv")
 ```
 The read.table function, reads the csv file at the specified location. The assignment operator is " <-" indicates that the data file is to be called "my.data". We can examine the data by typing it's name into the console window. Try it and see what happens. 
 ```{r eval=F}
@@ -43,7 +44,7 @@ This is not the best way to view the data! Instead we might want to know the var
 ```{r eval=F}
 col.names(my.data)
 ```
-Alternativeley we might want to view just the top of the file. Then we could type 
+Alternatively we might want to view just the top of the file. Then we could type 
 ```{r eval=F}
 head(my.data)
 ```
@@ -76,9 +77,9 @@ Data can also be exported using the write.csv command. Try saving the SPSS data 
 ```
 
 ## Manipulating data
-Once a dataset has been imported we can start interrogating it. If we know the variable name we can examine it on it's own. Say we want to look at the XXX variable in the SPSS data. We would type
+Once a dataset has been imported we can start interrogating it. If we know the variable name we can examine it on it's own. Say we want to look at the number variable in the delegates data. We would type
 ```{r eval=F}
-spss.data$XXXX
+my.data$number
 ```
 We can get summary information on this variable using the summary command. Try it now (remember, you can type "?summary" for help). Write in the mean and standard deviation in your workbook below. 
 
@@ -139,6 +140,10 @@ ID | Time | X1 | X2
 2	|1|	6|	1
 2	|2|	2|	4
 
+Create this dataset by typing
+```{r eval=F}
+mydata <- data.frame(ID=c(1,1,2,2),Time=c(1,2,1,2),X1=c(5,3,6,2),X2=c(6,5,1,4))
+```
  In this dataset, the measurements are the values in the last two columns (5, 6, 3, 5, 6, 1, 2, and 4). Each measurement is uniquely identified by a combination of ID variables (in this case ID, Time, and whether the measurement is on X1 or X2). For example, the measured value 5 in the first row is uniquely identified by knowing that it's from observation (ID) 1, at Time 1, and on variable X1.
  
  ##Melting
@@ -181,9 +186,9 @@ Where md is the melted data, formula describes the desired end result, and FUN i
 ```{r eval=F}
 rowvar1 + rowvar2 + .  ~  colvar1 + colvar2 + .
 ```
-In this formula, rowvar1 + rowvar2 + . define the set of crossed variables that define the rows, and colvar1 + colvar2 + . define the set of crossed variables that define the columns. See the examples in figure 1. 
+In this formula, rowvar1 + rowvar2 + . define the set of crossed variables that define the rows, and colvar1 + colvar2 + . define the set of crossed variables that define the columns. See the examples in figure 2. 
 
-![Reshaping data with the melt() and cast() functions](S://PCAPH//PCAPH//Individuals Folders//Mark Kelly//Teaching//R//learnR//Handbook//reshaping-data-using-melt-and-cast.png) 
+![Reshaping data with the melt() and cast() functions](//Users//Mark//Documents//Cardiff//Teaching//R//learnR//Handbook//reshaping-data-using-melt-and-cast.png) 
 
 Because the formulas on the right side (d, e, and f) don't include a function, the data is reshaped. In contrast, the examples on the left side (a, b, and c) specify the mean as an aggregating function. Thus the data are not only reshaped but aggregated as well. For example, (a) gives the means on X1 and X2 averaged over time for each observation. Example (b) gives the mean scores of X1 and X2 at Time 1 and Time 2, averaged over observations. In (c) you have the mean score for each observation at Time 1 and Time 2, averaged over X1 and X2.
 
@@ -348,7 +353,7 @@ As before the first column of Y is matched to X where the values are equal. The 
 
 This is taken from [here](http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html)
 
-![](S://PCAPH//PCAPH//Individuals Folders//Mark Kelly//Teaching//R//learnR//Handbook//Economist1.png) 
+![](//Users//Mark//Documents//Cardiff//Teaching//R//learnR//Handbook//Economist1.png) 
 
 Everyone: Download workshop materials:
 
@@ -356,10 +361,6 @@ Everyone: Download workshop materials:
 Download materials from http://tutorials.iq.harvard.edu/R/Rgraphics.zip
 Extract the zip file containing the materials to your desktop
 Workshop notes are available in .hmtl format. Open a file browser, navigate to your desktop and open Rgraphics.html
-
-THIS CAN BE AN EXERCISE
-
-
 
 
 ##Why ggplot2?
@@ -396,6 +397,6 @@ The basic idea: independently specify plot building blocks and combine them to c
 
 Let's look at housing prices.
 ```{r eval=T}
-housing <- read.csv("dataSets/landdata-states.csv")
+housing <- read.csv("data/landdata-states.csv")
 head(housing[1:5])
 ```

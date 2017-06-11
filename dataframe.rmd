@@ -1,7 +1,8 @@
 ---
-title: "Storing and using data in data.frame"
-author: "Dave Gillespie"
-date: "4 April 2017"
+title: "Project Phoenix learnR Session 2 UNAM"
+subtitle: "Storing and using data in data.frame"
+author: "Dr Dave Gillespie - Cardiff University"
+date: "12 June 2017"
 output: pdf_document
 ---
 
@@ -186,7 +187,7 @@ library(foreign)
 
 ```{r read in SPSS example, warning = FALSE}
 spssexample<-read.spss(file=
-                         "C:\\Users\\gille\\Documents\\PhD stuff\\Simulated data for CH4 030616.sav"
+                         "data//Simulated data for CH4 030616.sav"
                        , to.data.frame=T, use.value.labels=T)
 ```
 
