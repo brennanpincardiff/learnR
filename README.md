@@ -5,6 +5,6 @@ This material is for creating the handbook for the learnR course to be delivered
 Tutors: 
 * Dr Lillian Pazvakawambwa (UNAM)
 * Dr Nelago Indongo (UNAM)
-* Dr David Gillespie (CU)
+* Dr David Gillespie (Cardiff University)
 * Dr Paul Brennan (CU) [http://rforbiochemists.blogspot.co.uk/]
 * Dr Mark Kelson (UoE)
