@@ -72,6 +72,8 @@ Let's explore whether a cars weight (mtcars$wt) is associated with it's miles pe
 ```{r eval=T}
 model1 <- lm(mpg~wt,data=mtcars)
 summary(model1)
+plot(mtcars$wt,mtcars$mpg)
+abline(model1)
 ```
 Let's explore the model fit
 ```{r eval=T}
