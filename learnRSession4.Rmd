@@ -1,4 +1,8 @@
 ---
+title: "Project Phoenix learnR Session 4 UNAM"
+subtitle: "Regression"
+author: "Dr Mark Kelson - University of Exeter"
+date: "13 June 2017"
 output: pdf_document
 ---
 
@@ -95,9 +99,9 @@ The argument “pch” specifies how the “plot characters” should be drawn.
 Need to look for non-constant variance across all groups, and whether there's any ordering among groups.
 
 It is also possible to use Levene's test to assess the homogeneity of variance assumption. Levene's test is quite insensitive to non-normality. Also, because most parametric statistical tests are relatively insensitive to non-constant variance, there is no need to take action unless Levene’s Test is significant at the 1% level (Faraway 2004).
-```{r eval =T}
+```{r eval=T}
 library(car)
-levenetest(mtcars$mpg,mtcars$am)
+leveneTest(mtcars$mpg,mtcars$am)
 ```
 
 Checking the Normality assumption (residuals should be normally distributed for linear models). Note: Only long-tailed distributions cause large inaccuracies for linear models. It is possible to transform log-normal distributions, but mild non-normality can be safely ignored. 
@@ -122,4 +126,4 @@ gi <- influence(model1)
 qqnorm(gi$coef[,2])
 ```
 
-This produces a leverage plot for the 2nd term in the model, since inclusion of the intercept makes weight variable the 2nd term in the model.
+This produces a leverage plot for the 2nd term in the model, since inclusion of the intercept makes the weight variable the 2nd term in the model.

@@ -6,7 +6,8 @@ checkpoint("2016-08-22")
 file <- "https://opendata.socrata.com/api/views/ddym-zvjk/rows.csv"
 starbucks <- read.csv(file)
 library(leaflet); library(magrittr)
-leaflet() %>% addTiles() %>% setView(-84.3847, 33.7613, zoom = 16) %>% 
+leaflet() %>%   # this
+  addTiles() %>% setView(-84.3847, 33.7613, zoom = 16) %>% 
   addMarkers(data = starbucks, lat = ~ Latitude, lng = ~ Longitude, popup = starbucks$Name)
 
 
