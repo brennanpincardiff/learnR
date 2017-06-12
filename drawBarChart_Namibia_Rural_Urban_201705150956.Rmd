@@ -1,11 +1,9 @@
 ---
-title: "Exploring ggplot"
-author: "Paul Brennan"
+title: "Project Phoenix learnR Session 3 UNAM"
+subtitle: "Exploring ggplot2"
+author: "Dr Paul Brennan - Cardiff University"
 date: "15 May 2017"
-output:
-  pdf_document: default
-  html_document: default
-  word_document: default
+output: pdf_document
 ---
 
 ![](https://raw.githubusercontent.com/MarkKelson/learnR/master/learnR.png)
