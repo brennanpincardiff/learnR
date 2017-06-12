@@ -35,6 +35,15 @@ summary(m1)
 #The mtcars data
 mtcars
 
+# plot some data
+library(ggplot2)
+ggplot(mtcars, 
+       aes(wt,
+           mpg)) +
+  geom_point()  +
+  stat_smooth(method = "lm") +
+  theme_bw()
+
 #This fits the model
 model1 <- lm(mpg~wt,data=mtcars)
 summary(model1)
