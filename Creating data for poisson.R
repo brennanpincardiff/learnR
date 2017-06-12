@@ -8,3 +8,4 @@ p <- within(p, {
 summary(p)
 
 write.csv(p,file="/Users/Mark/Documents/GitHub/learnR/Day 3/poisson.csv")
+
