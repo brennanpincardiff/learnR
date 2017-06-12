@@ -51,7 +51,7 @@ summary(lm(abs(resid(model1))~ fitted(model1)))
 plot(resid(model1)~fitted(model1),pch=unclass(mtcars$am))
 
 library(car)
-levenetest(mtcars$mpg,mtcars$am)
+leveneTest(mtcars$mpg,mtcars$am)
 
 qqnorm(resid(model1),ylab="Residuals")
 qqline(resid(model1))
