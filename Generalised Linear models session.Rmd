@@ -1,0 +1,158 @@
+---
+title: "Generalised linear models"
+output: pdf_document
+---
+
+
+![](https://raw.githubusercontent.com/MarkKelson/learnR/master/learnR.png)
+ 
+
+## Generalised linear models
+
+Sometimes the data that you are handling are not continuously or normally distributed (and cannot be easily transformed into such a distribution). In these situations we may opt to use a generalised linear model. We will cover three such models: logistic regression, poisson regression and survival analysis. 
+
+##Logistic regression
+This is characterised by an outcome which can take on two values (and two values only). Examples are: success/fail, dead/alive, yes/no, present/absent. These types of random variables are governed by the binomial distribution. 
+
+We can explore the examdata file which contains test scores (expressed as a percentage) on 1,000 students.
+```{r eval= T}
+examdata <- read.csv(file="//Users//Mark//Documents//Cardiff//Teaching//R//learnR//Handbook//Datasets//examdat.csv")
+```
+
+The file also contains information on the number of hours of tuition they received (between 0 and 10 hours) and the students star signs. We might hypothesise that hours of tuition will be positively associated with test scores, while star signs would have no bearing at all. In addition, we are strictly interested in the pass/fail rate, where a pass is 60% or greater. We could explore the situation graphically as follows.  
+```{r eval=T]
+plot(sort(unique(examdata$tuition)), sapply(split(I(examdata$testscore>=60),examdata$tuition),mean))
+```
+This certainly indicates that more tuition results in higher chances of passing the exam. We could fit this formally as
+
+```{r eval=T}
+exammodel <- glm(I(testscore>=60)~tuition,data=examdata,family="binomial")
+summary(exammodel)
+```
+Due to the nature of the link function used in a logistic regression we need to transform the coefficients returned into odds ratios. We do this by taking the exponetial of them as follows
+```{r eval=T}
+exp(coef(exammodel))
+```
+We may want to round these to three decimal places we could type
+```{r eval=T}
+round(exp(coef(exammodel)),3)
+```
+We could get confidence intervals in the same way as before, but we need to again transform them into odds ratios. 
+```{r eval=T}
+exp(confint(exammodel))
+```
+We can include information on the star sign now.
+```{r eval=T}
+exammodelplus <- glm(I(testscore>=60)~tuition + starsign,data=examdata,family="binomial")
+summary(exammodelplus)
+exp(coef(exammodelplus))
+exp(confint(exammodelplus))
+```
+
+
+We can create our own function here if we want to 
+
+```{r eval=T}
+logregressout <- function(logregressmodel)
+{
+OR <- round(exp(coef(logregressmodel)),2)
+OR.CI <- round(exp(confint(logregressmodel)),2)
+return(data.frame(OR=OR,OR.CI=OR.CI))
+}
+logregressout(exammodelplus)
+```
+
+We can check model performance simply by exploring predicted values versus observed. We can take a predicted probability of an event of >0.5 as meaning that we predict that case will have an event.
+```{r eval=T}
+table(fitted(exammodelplus)>.5,I(examdata$testscore>=60))
+```
+
+
+##Poisson regression
+Poisson regression is characterised by outcome variables which are non-negative, discrete and integer values. 
+This is taken from here 
+https://stats.idre.ucla.edu/r/dae/poisson-regression/
+
+```{r eval=T}
+poissonpath <- "/Users/Mark/Documents/GitHub/learnR/Day 3/poisson.csv"
+
+p <- read.csv(file=poissonpath)
+
+library(ggplot2)
+
+ggplot(p, aes(num_awards, fill = prog)) +
+  geom_histogram(binwidth=.5, position="dodge")
+
+summary(m1 <- glm(num_awards ~ prog + math, family="poisson", data=p))
+```
+We can drop the prog variable if we want
+
+```{r eval=T}
+## update m1 model dropping prog
+m2 <- update(m1, . ~ . - prog)
+## test model differences with chi square test
+anova(m2, m1, test="Chisq")
+```
+
+
+```{r eval=T}
+library(msm)
+library(sandwich)
+cov.m1 <- vcovHC(m1, type="HC0")
+cov.m1 <- vcovHC(m1, type="HC0")
+std.err <- sqrt(diag(cov.m1))
+r.est <- cbind(Estimate= coef(m1), "Robust SE" = std.err,
+"Pr(>|z|)" = 2 * pnorm(abs(coef(m1)/std.err), lower.tail=FALSE),
+LL = coef(m1) - 1.96 * std.err,
+UL = coef(m1) + 1.96 * std.err)
+
+s <- deltamethod(list(~ exp(x1), ~ exp(x2), ~ exp(x3), ~ exp(x4)), 
+                                                coef(m1), cov.m1)
+## exponentiate old estimates dropping the p values
+rexp.est <- exp(r.est[, -3])
+## replace SEs with estimates for exponentiated coefficients
+rexp.est[, "Robust SE"] <- s
+
+rexp.est
+```
+
+```{r eval = T}
+## calculate and store predicted values
+p$phat <- predict(m1, type="response")
+
+## order by program and then by math
+p <- p[with(p, order(prog, math)), ]
+
+## create the plot
+ggplot(p, aes(x = math, y = phat, colour = prog)) +
+  geom_point(aes(y = num_awards), alpha=.5, position=position_jitter(h=.2)) +
+  geom_line(size = 1) +
+  labs(x = "Math Score", y = "Expected number of awards")
+```
+
+
+##Survival analysis
+This is taken from here https://www.openintro.org/download.php?file=survival_analysis_in_R&referrer=/stat/surv.php
+
+library(survival)
+library(KMsurv)
+
+data(tongue)
+attach(tongue)
+my.surv <- Surv(time[type==1], delta[type==1])
+survfit(my.surv ~ 1)
+
+my.fit <- survfit(my.surv)
+summary(my.fit)$surv # returns the Kaplan-Meier estimate at each t_i
+summary(my.fit)$time # {t_i}
+summary(my.fit)$n.risk # {Y_i}
+summary(my.fit)$n.event # {d_i}
+summary(my.fit)$std.err # standard error of the K-M estimate at {t_i}
+summary(my.fit)$lower # lower pointwise estimates (alternatively, $upper)
+str(my.fit) # full summary of the my.fit object
+str(summary(my.fit)) # full summary of the my.fit object
+
+
+
+plot(my.fit, main="Kaplan-Meier estimate with 95% confidence bounds",
++ xlab="time", ylab="survival function")
