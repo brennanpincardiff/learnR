@@ -1,3 +1,4 @@
+
 #This creates the data
 
 #Input of elevation data in meters
@@ -14,6 +15,7 @@ pH <- c(4.25,4.1,4.2,4.12)
 #######
 #This explores correlations
 cor(m,ppt)
+plot(m, ppt)
 cor(m,temp)
 cor(temp,ppt)
 cor(m,cn)
@@ -25,11 +27,22 @@ cor(temp,pH)
 abiotic <- data.frame(elevation.m= m, precip.mm=ppt,temp.C = temp, cn = cn, pH= pH)
 #Plot all possible combinations of these variables with blue symbols
 plot(abiotic, col= "blue")
+plot(abiotic, col = "red", pch=5)
 
 #######
 #This fits the model
-m1 <- lm(pH~temp.C, data= abiotic)
+m1 <- lm(pH~temp.C, data= abiotic) # one line :-)
+
 summary(m1)
+
+plot(pH~temp.C, data= abiotic)
+abline(m1, col = "blue")
+
+# Exercise: try making other models with this data
+# maybe....
+#This fits the model
+m2 <- lm(precip.m~elevation.m, data= abiotic) # one line :-)
+
 
 #######
 #The mtcars data
@@ -66,8 +79,10 @@ qqnorm(resid(model1),ylab="Residuals")
 qqline(resid(model1))
 
 plot(density(resid(model1)))
-rug(resid(model1))
+rug(resid(model1), col="red")
 
 gi <- influence(model1)
 qqnorm(gi$coef[,2])
+par(mfrow=c(2,2))
+plot(model1)
 

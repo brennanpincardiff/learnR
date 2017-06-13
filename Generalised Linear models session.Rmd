@@ -1,6 +1,6 @@
 ---
 title: "Generalised linear models"
-output: pdf_document
+output: word_document
 ---
 
 
@@ -9,54 +9,88 @@ output: pdf_document
 
 ## Generalised linear models
 
-Sometimes the data that you are handling are not continuously or normally distributed (and cannot be easily transformed into such a distribution). In these situations we may opt to use a generalised linear model. We will cover three such models: logistic regression, poisson regression and survival analysis. 
+Sometimes the data that we are handling are not continuously or normally distributed (and cannot be easily transformed into such a distribution). In these situations we may opt to use a generalised linear model. We will cover logistic regression and poisson regression and then also survival analysis. 
 
 ##Logistic regression
 This is characterised by an outcome which can take on two values (and two values only). Examples are: success/fail, dead/alive, yes/no, present/absent. These types of random variables are governed by the binomial distribution. 
 
 We can explore the examdata file which contains test scores (expressed as a percentage) on 1,000 students.
 ```{r eval= T}
-examdata <- read.csv(file="//Users//Mark//Documents//Cardiff//Teaching//R//learnR//Handbook//Datasets//examdat.csv")
+examdatpath <- "//Users//Mark//Documents//Cardiff//Teaching//R//learnR//Handbook//Datasets//examdat.csv"
+examdata <- read.csv(file=examdatpath)
 ```
 
-The file also contains information on the number of hours of tuition they received (between 0 and 10 hours) and the students star signs. We might hypothesise that hours of tuition will be positively associated with test scores, while star signs would have no bearing at all. In addition, we are strictly interested in the pass/fail rate, where a pass is 60% or greater. We could explore the situation graphically as follows.  
-```{r eval=T]
-plot(sort(unique(examdata$tuition)), sapply(split(I(examdata$testscore>=60),examdata$tuition),mean))
+The file contains information on the number of hours of tuition they received (between 0 and 10 hours) and the students star signs. We might hypothesise that hours of tuition will be positively associated with test scores, while star signs would have no bearing at all. In addition, we are strictly interested in the pass/fail rate, where a pass is 60% or greater. We could explore the situation graphically as follows.  
+```{r eval=T}
+examdata$pass <- I(examdata$testscore>=60)
+plot(0:10, sapply(split(examdata$pass,examdata$tuition),mean))
 ```
 This certainly indicates that more tuition results in higher chances of passing the exam. We could fit this formally as
 
 ```{r eval=T}
-exammodel <- glm(I(testscore>=60)~tuition,data=examdata,family="binomial")
+exammodel <- glm(examdata$pass~tuition,
+data=examdata,
+family="binomial")
 summary(exammodel)
 ```
 Due to the nature of the link function used in a logistic regression we need to transform the coefficients returned into odds ratios. We do this by taking the exponetial of them as follows
 ```{r eval=T}
+library(magrittr)
+#This is one way to get the exponential of the coefficients
 exp(coef(exammodel))
+
+#This is a better way
+exammodel %>%   #our logisitic regression model object
+  coef() %>%    #get the coefficients
+    exp()       #exponentiate them 
+
 ```
 We may want to round these to three decimal places we could type
 ```{r eval=T}
 round(exp(coef(exammodel)),3)
 ```
+Try doing the above using pipes.
+
+
 We could get confidence intervals in the same way as before, but we need to again transform them into odds ratios. 
 ```{r eval=T}
-exp(confint(exammodel))
+exammodel %>%     #This is our model object
+  confint() %>%   #This calculates the confidence intervals
+    exp()         #This exponentiates 
 ```
 We can include information on the star sign now.
 ```{r eval=T}
-exammodelplus <- glm(I(testscore>=60)~tuition + starsign,data=examdata,family="binomial")
+exammodelplus <- glm(pass~tuition + starsign,
+data=examdata,
+family="binomial")
+
 summary(exammodelplus)
-exp(coef(exammodelplus))
-exp(confint(exammodelplus))
+
+exammodelplus %>%
+  coef()  %>%
+    exp()
+    
+    exammodelplus %>%
+  confint()  %>%
+    exp()
+    
 ```
 
 
 We can create our own function here if we want to 
 
 ```{r eval=T}
-logregressout <- function(logregressmodel)
-{
-OR <- round(exp(coef(logregressmodel)),2)
-OR.CI <- round(exp(confint(logregressmodel)),2)
+logregressout <- function(logregressmodel){
+OR <- logregressmodel %>%
+  coef() %>%
+    exp() %>%
+      round(2)
+      
+OR.CI <- logregressmodel %>%
+  confint() %>%
+    exp() %>%
+      round(2)
+      
 return(data.frame(OR=OR,OR.CI=OR.CI))
 }
 logregressout(exammodelplus)
@@ -64,27 +98,60 @@ logregressout(exammodelplus)
 
 We can check model performance simply by exploring predicted values versus observed. We can take a predicted probability of an event of >0.5 as meaning that we predict that case will have an event.
 ```{r eval=T}
-table(fitted(exammodelplus)>.5,I(examdata$testscore>=60))
+examdata$pred.pass <- fitted(exammodelplus)>0.5
+table(examdata$pred.pass,examdata$pass)
 ```
-
 
 ##Poisson regression
 Poisson regression is characterised by outcome variables which are non-negative, discrete and integer values. 
 This is taken from here 
 https://stats.idre.ucla.edu/r/dae/poisson-regression/
 
+##Examples of Poisson regression
+
+Example 1. The number of persons killed by mule or horse kicks in the Prussian army per year. Ladislaus Bortkiewicz collected data from 20 volumes of Preussischen Statistik. These data were collected on 10 corps of the Prussian army in the late 1800s over the course of 20 years.
+
+Example 2. The number of people in line in front of you at the grocery store. Predictors may include the number of items currently offered at a special discounted price and whether a special event (e.g., a holiday, a big sporting event) is three or fewer days away.
+
+Example 3. The number of awards earned by students at one high school. Predictors of the number of awards earned include the type of program in which the student was enrolled (e.g., vocational, general or academic) and the score on their final exam in math.
+
+For the purpose of illustration, we have simulated a data set for Example 3 above. In this example, num_awards is the outcome variable and indicates the number of awards earned by students at a high school in a year, math is a continuous predictor variable and represents students’ scores on their math final exam, and prog is a categorical predictor variable with three levels indicating the type of program in which the students were enrolled. It is coded as 1 = “General”, 2 = “Academic” and 3 = “Vocational”. Let’s start with loading the data and looking at some descriptive statistics.
+
 ```{r eval=T}
-poissonpath <- "/Users/Mark/Documents/GitHub/learnR/Day 3/poisson.csv"
+poissonpath <- "/Users/Mark/Documents/GitHub/learnR/data/poisson.csv"
 
 p <- read.csv(file=poissonpath)
+```
+Each variable has 200 valid observations and their distributions seem quite reasonable. The unconditional mean and variance of our outcome variable are not extremely different. Our model assumes that these values, conditioned on the predictor variables, will be equal (or at least roughly so).
 
+We can use the tapply function to display the summary statistics by program type. The table below shows the average numbers of awards by program type and seems to suggest that program type is a good candidate for predicting the number of awards, our outcome variable, because the mean value of the outcome appears to vary by prog. Additionally, the means and variances within each level of prog–the conditional means and variances–are similar. A conditional histogram separated out by program type is plotted to show the distribution.
+```{r eval=T}
 library(ggplot2)
 
 ggplot(p, aes(num_awards, fill = prog)) +
   geom_histogram(binwidth=.5, position="dodge")
-
+```
+We are ready to perform our Poisson model analysis using the glm function. We fit the model and store it in the object m1 and get a summary of the model at the same time
+```{r eval= T}
 summary(m1 <- glm(num_awards ~ prog + math, family="poisson", data=p))
 ```
+Cameron and Trivedi (2009) recommended using robust standard errors for the parameter estimates to control for mild violation of the distribution assumption that the variance equals the mean. We use R package sandwich below to obtain the robust standard errors and calculated the p-values accordingly. Together with the p-values, we have also calculated the 95% confidence interval using the parameter estimates and their robust standard errors.
+
+```{r eval=T}
+library(sandwich)
+cov.m1 <- vcovHC(m1, type="HC0")
+std.err <- sqrt(diag(cov.m1))
+r.est <- cbind(Estimate= coef(m1), "Robust SE" = std.err,
+"Pr(>|z|)" = 2 * pnorm(abs(coef(m1)/std.err), lower.tail=FALSE),
+LL = coef(m1) - 1.96 * std.err,
+UL = coef(m1) + 1.96 * std.err)
+
+r.est
+```
+The output begins with echoing the function call. The information on deviance residuals is displayed next. Deviance residuals are approximately normally distributed if the model is specified correctly.In our example, it shows a little bit of skeweness since median is not quite zero.
+Next come the Poisson regression coefficients for each of the variables along with the standard errors, z-scores, p-values and 95% confidence intervals for the coefficients. The coefficient for math is .07. This means that the expected log count for a one-unit increase in math is .07. The indicator variable progAcademic compares between prog = “Academic” and prog = “General”, the expected log count for prog = “Academic” increases by about 1.1. The indicator variable prog.Vocational is the expected difference in log count ((approx .37)) between prog = “Vocational” and the reference group (prog = “General”).
+The information on deviance is also provided. We can use the residual deviance to perform a goodness of fit test for the overall model. The residual deviance is the difference between the deviance of the current model and the maximum deviance of the ideal model where the predicted values are identical to the observed. Therefore, if the residual difference is small enough, the goodness of fit test will not be significant, indicating that the model fits the data. We conclude that the model fits reasonably well because the goodness-of-fit chi-squared test is not statistically significant. If the test had been statistically significant, it would indicate that the data do not fit the model well. In that situation, we may try to determine if there are omitted predictor variables, if our linearity assumption holds and/or if there is an issue of over-dispersion.
+
 We can drop the prog variable if we want
 
 ```{r eval=T}
@@ -94,34 +161,10 @@ m2 <- update(m1, . ~ . - prog)
 anova(m2, m1, test="Chisq")
 ```
 
-
-```{r eval=T}
-library(msm)
-library(sandwich)
-cov.m1 <- vcovHC(m1, type="HC0")
-cov.m1 <- vcovHC(m1, type="HC0")
-std.err <- sqrt(diag(cov.m1))
-r.est <- cbind(Estimate= coef(m1), "Robust SE" = std.err,
-"Pr(>|z|)" = 2 * pnorm(abs(coef(m1)/std.err), lower.tail=FALSE),
-LL = coef(m1) - 1.96 * std.err,
-UL = coef(m1) + 1.96 * std.err)
-
-s <- deltamethod(list(~ exp(x1), ~ exp(x2), ~ exp(x3), ~ exp(x4)), 
-                                                coef(m1), cov.m1)
-## exponentiate old estimates dropping the p values
-rexp.est <- exp(r.est[, -3])
-## replace SEs with estimates for exponentiated coefficients
-rexp.est[, "Robust SE"] <- s
-
-rexp.est
-```
-
-```{r eval = T}
 ## calculate and store predicted values
 p$phat <- predict(m1, type="response")
 
-## order by program and then by math
-p <- p[with(p, order(prog, math)), ]
+We can also graph the predicted number of events with the commands below. The graph indicates that the most awards are predicted for those in the academic program (prog = 2), especially if the student has a high math score. The lowest number of predicted awards is for those students in the general program (prog = 1). The graph overlays the lines of expected values onto the actual points, although a small amount of random noise was added vertically to lessen overplotting.
 
 ## create the plot
 ggplot(p, aes(x = math, y = phat, colour = prog)) +
@@ -134,15 +177,51 @@ ggplot(p, aes(x = math, y = phat, colour = prog)) +
 ##Survival analysis
 This is taken from here https://www.openintro.org/download.php?file=survival_analysis_in_R&referrer=/stat/surv.php
 
+```{r eval= T}
 library(survival)
 library(KMsurv)
+```
 
+#Survival objects
+Many functions in the survival package apply methods to Surv objects, which are survival-type
+objects created using the Surv() function. Here we discuss the construction of right-censored Surv
+objects and left-truncated right-censored Surv objects. See reference 6 for descriptions of survival
+data types.
+For right-censored data, only two arguments are needed in the Surv() function: a vector of times
+and a vector indicating which times are observed and censored.
+
+```{r eval=T}
 data(tongue)
 attach(tongue)
+# create a subset for just the first group by using [type==1]
 my.surv <- Surv(time[type==1], delta[type==1])
+my.surv
+```
+The plus-signs identify those observations that are right-censored. The first argument in Surv()
+should be input as a vector of observed and right-censored times. An indicator vector is used in
+the second argument to signify whether the event was observed (1) or not (0). Boolean arguments
+may be used in place of 1 and 0 in the indicator vector.
+We also consider left-truncated right-censored data. The left-truncation times are entered as the
+first argument, a vector of the event and censored times is input into the second argument, and an
+indicator vector for right-censoring is input as the third argument.
+```{r eval =T}
 survfit(my.surv ~ 1)
+```
+Survfit() also has a number of optional arguments. For example, the confidence level may be
+changed using the second argument, conf.int (e.g. conf.int=0.90 for 90% confidence bounds).
+The conf.type argument describes the type of confidence interval. More specifically, it describes
+the transformation for constructing the confidence interval. The default is "log", which equates
+to the transformation function g(t) = log(t). The "log-log" option uses g(t) = log(− log(t)). A
+linear confidence interval is created using the argument conf.type="plain". In the current version
+of the survival package (version 2.36-10), the arcsine-squareroot transformation must be computed
+manually using components of the object returned by survfit().
+Like many functions in R, the survfit() function returns hidden information that can be accessed
+with the proper commands. Below we consider several elements of this hidden information, which
+is stored in a list. For a complete summary of the object, apply the str function to my.fit and to
+summary(my.fit).
 
-my.fit <- survfit(my.surv)
+```{r eval= T}
+my.fit <- survfit(my.surv ~ 1)
 summary(my.fit)$surv # returns the Kaplan-Meier estimate at each t_i
 summary(my.fit)$time # {t_i}
 summary(my.fit)$n.risk # {Y_i}
@@ -151,8 +230,14 @@ summary(my.fit)$std.err # standard error of the K-M estimate at {t_i}
 summary(my.fit)$lower # lower pointwise estimates (alternatively, $upper)
 str(my.fit) # full summary of the my.fit object
 str(summary(my.fit)) # full summary of the my.fit object
+```
 
-
-
+The object returned by summary(my.fit) is a list. The str function is useful for seeing more
+details about what is contained in the list, and as shown above, we can access each item in the list
+using the $ operator.
+The Kaplan-Meier estimate may be plotted using plot(my.fit). Standard arguments in the plot
+function may be used to improve the graphical aesthetics:
+```{r eval=T}
 plot(my.fit, main="Kaplan-Meier estimate with 95% confidence bounds",
-+ xlab="time", ylab="survival function")
+ xlab="time", ylab="survival function")
+```
